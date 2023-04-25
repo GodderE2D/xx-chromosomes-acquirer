@@ -1,0 +1,33 @@
+{
+  "name": "xx-chromosomes-acquirer",
+  "version": "1.0.0",
+  "description": "a discord bot to acquire, uh... a member of society with XX chromosomes?",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node .",
+    "build": "tsc",
+    "build:dev": "tsc -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GodderE2D/xx-chromosomes-acquirer.git"
+  },
+  "author": "GodderE2D <main@godder.xyz>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/GodderE2D/xx-chromosomes-acquirer/issues"
+  },
+  "homepage": "https://github.com/GodderE2D/xx-chromosomes-acquirer#readme",
+  "dependencies": {
+    "@sapphire/framework": "^4.4.1",
+    "discord.js": "latest",
+    "dotenv": "^16.0.3"
+  },
+  "packageManager": "yarn@1.22.19",
+  "devDependencies": {
+    "@sapphire/ts-config": "^4.0.0",
+    "@types/node": "^18.16.0",
+    "prettier": "^2.8.8"
+  },
+  "type": "module"
+}
