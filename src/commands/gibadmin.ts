@@ -42,7 +42,9 @@ export class ARCommand extends Command {
       await interaction.member.roles.add(roles.tempAdminRole);
 
       await interaction.reply(
-        `go wild, you lose/lost admin <t:${Math.floor(Date.now() + 3000)}:R>`
+        `go wild, you lose/lost <@&${roles.tempAdminRole}> <t:${Math.floor(
+          (Date.now() + 3000) / 1000
+        )}:R>`
       );
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
