@@ -7,6 +7,7 @@ import { isTextChannel } from "@sapphire/discord.js-utilities";
 const uuids: string[] = [
   "28b0a9f965c1450babebda9bf3d5830a",
   "085ae374d37049b6adf58eae0102a572",
+  "16999b06c26546588f0e9ab002a3a7b9",
 ];
 const announcementChannelId = "1100597109692051627";
 
