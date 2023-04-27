@@ -88,7 +88,7 @@ export class HypixelGameResultListener extends Listener {
                   games,
                 }: paths["/recentgames"]["get"]["responses"]["200"]["content"]["application/json"] =
                   data;
-                const { mode, map, ended } = games?.filter(
+                const { mode, map, ended, date } = games?.filter(
                   (game) => game.gameType === "BEDWARS"
                 )[0]!;
 
@@ -98,7 +98,9 @@ export class HypixelGameResultListener extends Listener {
                       wins > oldWins ? "won" : "lost"
                     } a Hypixel Bedwars game of **${
                       gamemodes[mode as keyof typeof gamemodes]
-                    }** on **${map}** <t:${Math.floor(ended! / 1000)}:R>`
+                    }** on **${map}** which ${
+                      ended ? "ended" : "started"
+                    } <t:${Math.floor(ended ?? date! / 1000)}:R>`
                   )
                   .setColor(wins > oldWins ? "Green" : "Red");
 
