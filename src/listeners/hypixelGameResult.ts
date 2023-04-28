@@ -100,9 +100,14 @@ export class HypixelGameResultListener extends Listener {
                       gamemodes[mode as keyof typeof gamemodes]
                     }** on **${map}** which ${
                       ended ? "ended" : "started"
-                    } <t:${Math.floor(ended ?? date! / 1000)}:R>`
+                    } <t:${Math.floor((ended ?? date!) / 1000)}:R>`
                   )
-                  .setColor(wins > oldWins ? "Green" : "Red");
+                  .setColor(wins > oldWins ? "Green" : "Red")
+                  .setFooter({
+                    text: ended
+                      ? "They left before the game has ended."
+                      : "They stayed in the game until the end.",
+                  });
 
                 const channel = await client.channels.fetch(
                   announcementChannelId
