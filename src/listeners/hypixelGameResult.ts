@@ -11,6 +11,7 @@ const uuids: string[] = [
 ];
 const announcementChannelId = "1100597109692051627";
 
+// Note: Some other Dream gamemodes are not added here.
 const gamemodes = {
   BEDWARS_EIGHT_ONE: "Solos",
   BEDWARS_EIGHT_TWO: "Duos",
@@ -61,9 +62,6 @@ export class HypixelGameResultListener extends Listener {
           // @ts-expect-error untyped properties
           const losses = player?.stats?.Bedwars?.losses_bedwars;
           const username = player?.displayname;
-
-          console.log(wins, losses);
-          console.log(cache);
 
           if (cache.has(uuid)) {
             const oldWins = cache.get(uuid)!.totalWins;
@@ -116,6 +114,32 @@ export class HypixelGameResultListener extends Listener {
                 await channel.send({ embeds: [embed] });
               } catch (error) {
                 console.error(error);
+                const embed = new EmbedBuilder()
+                  .setDescription(
+                    `**${username}** ${
+                      wins > oldWins ? "won" : "lost"
+                    } a Hypixel Bedwars game around <t:${Math.floor(
+                      Date.now() / 1000
+                    )}:R>`
+                  )
+                  .setColor(wins > oldWins ? "Green" : "Red")
+                  .setFooter({
+                    text: [
+                      "Could not fetch game data.",
+                      "This usually means that the player made their game tracking API private.",
+                    ].join("\n"),
+                  });
+
+                const channel = await client.channels.fetch(
+                  announcementChannelId
+                );
+
+                if (!isTextChannel(channel)) {
+                  console.error("Channel is not a text channel.");
+                  continue;
+                }
+
+                await channel.send({ embeds: [embed] });
               }
             }
           } else {
