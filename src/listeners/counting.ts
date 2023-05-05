@@ -1,7 +1,8 @@
 import { Listener } from "@sapphire/framework";
 import { Collection, Events, type Message } from "discord.js";
+import { db } from "../index.js";
 
-const channelId = "1099153687345102919";
+// const channelId = "1099153687345102919";
 
 export class AntiNSFWListener extends Listener {
   public constructor(context: Listener.Context, options: Listener.Options) {
@@ -13,7 +14,11 @@ export class AntiNSFWListener extends Listener {
 
   public async run(message: Message) {
     if (message.author.bot) return;
-    if (message.channel.id !== channelId) return;
+    if ((await db.get("config.counting:enabled")) === "false") return;
+    if (message.channel.id !== (await db.get("config.counting:channelId"))) {
+      return;
+    }
+
     const previousMsgs: Collection<string, Message> =
       await message.channel.messages.fetch();
     const previousMsg = previousMsgs

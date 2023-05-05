@@ -3,13 +3,14 @@ import { Client, EmbedBuilder, Events } from "discord.js";
 import axios from "axios";
 import type { paths } from "../types/schema.js";
 import { isTextChannel } from "@sapphire/discord.js-utilities";
+import { db } from "../index.js";
 
-const uuids: string[] = [
-  "28b0a9f965c1450babebda9bf3d5830a",
-  "085ae374d37049b6adf58eae0102a572",
-  "16999b06c26546588f0e9ab002a3a7b9",
-];
-const announcementChannelId = "1100597109692051627";
+// const uuids: string[] = [
+//   "28b0a9f965c1450babebda9bf3d5830a",
+//   "085ae374d37049b6adf58eae0102a572",
+//   "16999b06c26546588f0e9ab002a3a7b9",
+// ];
+// const announcementChannelId = "1100597109692051627";
 
 // Note: Some other Dream gamemodes are not added here.
 const gamemodes = {
@@ -33,10 +34,21 @@ export class HypixelGameResultListener extends Listener {
   }
 
   public async run(client: Client) {
-    if (!process.env.HYPIXEL_API_KEY)
+    if (!process.env.HYPIXEL_API_KEY) {
       return console.warn(
         "No Hypixel API key found. Hypixel game results will not be fetched."
       );
+    }
+
+    if ((await db.get("config.hypixelGameResult:enabled")) === false) return;
+
+    const dbUuids = await db.get("config.hypixelGameResult:uuids");
+    if (dbUuids?.length === 0) return;
+    const uuids = JSON.parse(dbUuids);
+
+    const announcementChannelId = await db.get(
+      "config.hypixelGameResult:announcementChannelId"
+    );
 
     const cache = new Map<string, { totalWins: number; totalLosses: number }>();
 

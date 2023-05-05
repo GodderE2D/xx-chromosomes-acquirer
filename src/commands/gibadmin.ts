@@ -1,10 +1,11 @@
 import { ApplicationCommandRegistry, Command } from "@sapphire/framework";
 import { isGuildMember } from "@sapphire/discord.js-utilities";
+import { db } from "../index.js";
 
-const roles = {
-  eligibleRole: "1099032374798467122",
-  tempAdminRole: "1100240074639155271",
-};
+// const roles = {
+//   eligibleRole: "1099032374798467122",
+//   tempAdminRole: "1100240074639155271",
+// };
 
 export class ARCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
@@ -31,6 +32,11 @@ export class ARCommand extends Command {
     }
 
     if (!isGuildMember(interaction.member)) return;
+
+    const roles = {
+      eligibleRole: await db.get("config.gibadmin:eligibleRole"),
+      tempAdminRole: await db.get("config.gibadmin:tempAdminRole"),
+    };
 
     if (!interaction.member.roles.cache.has(roles.eligibleRole)) {
       return interaction.reply(

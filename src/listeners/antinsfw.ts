@@ -1,8 +1,7 @@
 import { Listener } from "@sapphire/framework";
-import { Events, type Channel, type Snowflake } from "discord.js";
+import { Events, type Channel } from "discord.js";
 import { isTextChannel } from "@sapphire/discord.js-utilities";
-
-const antiNSFWChannelId: Snowflake = "1100119414856224798";
+import { db } from "../index.js";
 
 export class AntiNSFWListener extends Listener {
   public constructor(context: Listener.Context, options: Listener.Options) {
@@ -14,7 +13,7 @@ export class AntiNSFWListener extends Listener {
 
   public async run(oldChannel: Channel, newChannel: Channel) {
     if (!isTextChannel(oldChannel) || !isTextChannel(newChannel)) return;
-    if (newChannel.id !== antiNSFWChannelId) return;
+    if ((await db.get("config.antinsfw:enabled")) === false) return;
 
     if (oldChannel.nsfw === false && newChannel.nsfw === true) {
       try {
