@@ -67,7 +67,7 @@ export class MassConfigCommand extends Command {
           },
           {
             name: "New config",
-            value: object,
+            value: newConfig,
             inline: true,
           }
         )
