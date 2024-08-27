@@ -40,7 +40,7 @@ export class MCServerPingListener extends Listener {
       players: z.object({
         max: z.number(),
         online: z.number(),
-        sample: z.array(z.object({ name: z.string(), id: z.string() })),
+        sample: z.array(z.object({ name: z.string(), id: z.string() })).optional(),
       }),
       favicon: z.string().optional(),
     });
@@ -72,6 +72,8 @@ export class MCServerPingListener extends Listener {
 
           const status = statusSchema.parse(lookup.status);
 
+          if (!status.players.sample?.length) status.players.sample = [];
+
           const serverCache = cache.get(server) ?? cache.set(server, { online: false, players: [] }).get(server)!;
 
           let sentMessage = false;
@@ -102,7 +104,7 @@ export class MCServerPingListener extends Listener {
 
           const formattedPlayerList = status.players.sample.length
             ? `\n- ${status.players.sample.map((p) => `[${p.name}](https://namemc.com/profile/${p.id})`).join("\n- ")}`
-            : "\n";
+            : "";
 
           const buffer = status.favicon && Buffer.from(status.favicon.split(",")[1], "base64");
 
