@@ -214,14 +214,14 @@ export class BrawlStarsGameResultListener extends Listener {
               .setDescription(
                 `**${name}** ${
                   battle.rank
-                    ? `placed #${battle.rank} in`
+                    ? `placed #${battle.rank}`
                     : battle.result === "victory"
                     ? "won"
                     : battle.result === "defeat"
                     ? "lost"
                     : "drew"
-                } ${
-                  battle.trophyChange ? `(${battle.trophyChange > 0 ? "+" : ""}${battle.trophyChange})` : ""
+                } ${battle.trophyChange ? `(${battle.trophyChange > 0 ? "+" : ""}${battle.trophyChange})` : ""}${
+                  battle.rank ? " in" : ""
                 } a Brawl Stars game of **${gameTypes[battle.type as keyof typeof gameTypes] ?? battle.type}${
                   events[event.mode as keyof typeof events] ?? event.mode
                 }** on **${event.map}** <t:${Math.floor(getDate(battleTime).getTime() / 1000)}:R>`
