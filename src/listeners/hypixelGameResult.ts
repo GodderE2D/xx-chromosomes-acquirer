@@ -25,7 +25,7 @@ const gamemodes = {
 };
 
 export class HypixelGameResultListener extends Listener {
-  public constructor(context: Listener.Context, options: Listener.Options) {
+  public constructor(context: Listener.LoaderContext, options: Listener.Options) {
     super(context, {
       ...options,
       once: true,
@@ -35,9 +35,7 @@ export class HypixelGameResultListener extends Listener {
 
   public async run(client: Client) {
     if (!process.env.HYPIXEL_API_KEY) {
-      return console.warn(
-        "No Hypixel API key found. Hypixel game results will not be fetched."
-      );
+      return console.warn("No Hypixel API key found. Hypixel game results will not be fetched.");
     }
 
     if ((await db.get("config.hypixelGameResult:enabled")) === false) return;
@@ -46,28 +44,20 @@ export class HypixelGameResultListener extends Listener {
     if (dbUuids?.length === 0) return;
     const uuids = JSON.parse(dbUuids);
 
-    const announcementChannelId = await db.get(
-      "config.hypixelGameResult:announcementChannelId"
-    );
+    const announcementChannelId = await db.get("config.hypixelGameResult:announcementChannelId");
 
     const cache = new Map<string, { totalWins: number; totalLosses: number }>();
 
     setInterval(async () => {
       for (const uuid of uuids) {
         try {
-          const { data } = await axios.get(
-            `https://api.hypixel.net/player?uuid=${encodeURIComponent(uuid)}`,
-            {
-              headers: {
-                "API-Key": process.env.HYPIXEL_API_KEY,
-              },
-            }
-          );
+          const { data } = await axios.get(`https://api.hypixel.net/player?uuid=${encodeURIComponent(uuid)}`, {
+            headers: {
+              "API-Key": process.env.HYPIXEL_API_KEY,
+            },
+          });
 
-          const {
-            player,
-          }: paths["/player"]["get"]["responses"]["200"]["content"]["application/json"] =
-            data;
+          const { player }: paths["/player"]["get"]["responses"]["200"]["content"]["application/json"] = data;
 
           // @ts-expect-error untyped properties
           const wins = player?.stats?.Bedwars?.wins_bedwars;
@@ -84,9 +74,7 @@ export class HypixelGameResultListener extends Listener {
             if (wins > oldWins || losses > oldLosses) {
               try {
                 const { data } = await axios.get(
-                  `https://api.hypixel.net/recentgames?uuid=${encodeURIComponent(
-                    uuid
-                  )}`,
+                  `https://api.hypixel.net/recentgames?uuid=${encodeURIComponent(uuid)}`,
                   {
                     headers: {
                       "API-Key": process.env.HYPIXEL_API_KEY,
@@ -94,29 +82,18 @@ export class HypixelGameResultListener extends Listener {
                   }
                 );
 
-                const {
-                  games,
-                }: paths["/recentgames"]["get"]["responses"]["200"]["content"]["application/json"] =
-                  data;
-                const { mode, map, ended, date } = games?.filter(
-                  (game) => game.gameType === "BEDWARS"
-                )[0]!;
+                const { games }: paths["/recentgames"]["get"]["responses"]["200"]["content"]["application/json"] = data;
+                const { mode, map, ended, date } = games?.filter((game) => game.gameType === "BEDWARS")[0]!;
 
                 const embed = new EmbedBuilder()
                   .setDescription(
-                    `**${username}** ${
-                      wins > oldWins ? "won" : "lost"
-                    } a Hypixel Bedwars game of **${
+                    `**${username}** ${wins > oldWins ? "won" : "lost"} a Hypixel Bedwars game of **${
                       gamemodes[mode as keyof typeof gamemodes]
-                    }** on **${map}** which ${
-                      ended ? "ended" : "started"
-                    } <t:${Math.floor((ended ?? date!) / 1000)}:R>`
+                    }** on **${map}** which ${ended ? "ended" : "started"} <t:${Math.floor((ended ?? date!) / 1000)}:R>`
                   )
                   .setColor(wins > oldWins ? "Green" : "Red");
 
-                const channel = await client.channels.fetch(
-                  announcementChannelId
-                );
+                const channel = await client.channels.fetch(announcementChannelId);
 
                 if (!isTextChannel(channel)) {
                   console.error("Channel is not a text channel.");
@@ -128,9 +105,7 @@ export class HypixelGameResultListener extends Listener {
                 console.error(error);
                 const embed = new EmbedBuilder()
                   .setDescription(
-                    `**${username}** ${
-                      wins > oldWins ? "won" : "lost"
-                    } a Hypixel Bedwars game around <t:${Math.floor(
+                    `**${username}** ${wins > oldWins ? "won" : "lost"} a Hypixel Bedwars game around <t:${Math.floor(
                       Date.now() / 1000
                     )}:R>`
                   )
@@ -142,9 +117,7 @@ export class HypixelGameResultListener extends Listener {
                     ].join("\n"),
                   });
 
-                const channel = await client.channels.fetch(
-                  announcementChannelId
-                );
+                const channel = await client.channels.fetch(announcementChannelId);
 
                 if (!isTextChannel(channel)) {
                   console.error("Channel is not a text channel.");

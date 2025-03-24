@@ -1,5 +1,5 @@
 import { ApplicationCommandRegistry, Command } from "@sapphire/framework";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 import { db } from "../index.js";
 
 export class MassConfigCommand extends Command {
@@ -11,25 +11,16 @@ export class MassConfigCommand extends Command {
     });
   }
 
-  public override registerApplicationCommands(
-    registry: ApplicationCommandRegistry
-  ) {
+  public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
     registry.registerChatInputCommand((builder) =>
       builder
         .setName("mass-config")
         .setDescription("massively destruct the config file")
         .addStringOption((option) =>
-          option
-            .setName("object")
-            .setDescription("the object to set the entire config file to")
-            .setRequired(true)
+          option.setName("object").setDescription("the object to set the entire config file to").setRequired(true)
         )
         .addBooleanOption((option) =>
-          option
-            .setName("show")
-            .setDescription(
-              "whether the reply should be shown (default: false)"
-            )
+          option.setName("show").setDescription("whether the reply should be shown (default: false)")
         )
     );
   }
@@ -41,7 +32,7 @@ export class MassConfigCommand extends Command {
     if (interaction.user.id !== process.env.BOT_OWNER) {
       return interaction.reply({
         content: `only the bot owner <@${process.env.BOT_OWNER}> can use this command`,
-        ephemeral: !show,
+        flags: show ? undefined : MessageFlags.Ephemeral,
       });
     }
 
@@ -75,12 +66,12 @@ export class MassConfigCommand extends Command {
           text: "A bot restart may be needed for some changes to take effect: /restart",
         });
 
-      return interaction.reply({ embeds: [embed], ephemeral: !show });
+      return interaction.reply({ embeds: [embed], flags: show ? undefined : MessageFlags.Ephemeral });
     } catch (error) {
       console.error(error);
       return interaction.reply({
         content: `An error occurred while updating the config: ${error}`,
-        ephemeral: !show,
+        flags: show ? undefined : MessageFlags.Ephemeral,
       });
     }
   }

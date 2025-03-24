@@ -4,7 +4,7 @@ import { isTextChannel } from "@sapphire/discord.js-utilities";
 import { db } from "../index.js";
 
 export class AntiNSFWListener extends Listener {
-  public constructor(context: Listener.Context, options: Listener.Options) {
+  public constructor(context: Listener.LoaderContext, options: Listener.Options) {
     super(context, {
       ...options,
       event: Events.ChannelUpdate,

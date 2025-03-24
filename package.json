@@ -20,24 +20,22 @@
   },
   "homepage": "https://github.com/GodderE2D/xx-chromosomes-acquirer#readme",
   "dependencies": {
-    "@sapphire/framework": "^5.2.1",
-    "@types/better-sqlite3": "^7.6.11",
-    "axios": "^1.7.5",
-    "better-sqlite3": "^11.2.1",
-    "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5",
-    "minecraftstatuspinger": "^1.1.5",
-    "mongoose": "^8.5.4",
-    "mysql2": "^3.11.0",
+    "@sapphire/framework": "^5.3.2",
+    "@types/better-sqlite3": "^7.6.12",
+    "axios": "^1.8.4",
+    "better-sqlite3": "^11.9.1",
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "minecraftstatuspinger": "^1.2.2",
     "quick.db": "^9.1.7",
-    "typescript": "^5.5.4",
-    "zod": "^3.23.8"
+    "typescript": "^5.8.2",
+    "zod": "^3.24.2"
   },
-  "packageManager": "yarn@4.4.1",
+  "packageManager": "yarn@4.7.0",
   "devDependencies": {
     "@sapphire/ts-config": "^5.0.1",
-    "@types/node": "^22.5.0",
-    "prettier": "^3.3.3"
+    "@types/node": "^22.13.13",
+    "prettier": "^3.5.3"
   },
   "type": "module"
 }

@@ -4,8 +4,8 @@ import { db } from "../index.js";
 
 // const channelId = "1099153687345102919";
 
-export class AntiNSFWListener extends Listener {
-  public constructor(context: Listener.Context, options: Listener.Options) {
+export class CountingListener extends Listener {
+  public constructor(context: Listener.LoaderContext, options: Listener.Options) {
     super(context, {
       ...options,
       event: Events.MessageCreate,
@@ -14,16 +14,14 @@ export class AntiNSFWListener extends Listener {
 
   public async run(message: Message) {
     if (message.author.bot) return;
+    if (!message.inGuild()) return;
     if ((await db.get("config.counting:enabled")) === "false") return;
     if (message.channel.id !== (await db.get("config.counting:channelId"))) {
       return;
     }
 
-    const previousMsgs: Collection<string, Message> =
-      await message.channel.messages.fetch();
-    const previousMsg = previousMsgs
-      .filter((msg) => !msg.author.bot && msg.id !== message.id)
-      .first();
+    const previousMsgs: Collection<string, Message> = await message.channel.messages.fetch();
+    const previousMsg = previousMsgs.filter((msg) => !msg.author.bot && msg.id !== message.id).first();
 
     if (!previousMsg) return;
 

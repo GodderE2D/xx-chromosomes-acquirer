@@ -1,5 +1,5 @@
 import { ApplicationCommandRegistry, Command } from "@sapphire/framework";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 import { db } from "../index.js";
 
 export class ConfigCommand extends Command {
@@ -11,31 +11,17 @@ export class ConfigCommand extends Command {
     });
   }
 
-  public override registerApplicationCommands(
-    registry: ApplicationCommandRegistry
-  ) {
+  public override registerApplicationCommands(registry: ApplicationCommandRegistry) {
     registry.registerChatInputCommand((builder) =>
       builder
         .setName("config")
         .setDescription("config something idk")
+        .addStringOption((option) => option.setName("key").setDescription("the key to config").setRequired(true))
         .addStringOption((option) =>
-          option
-            .setName("key")
-            .setDescription("the key to config")
-            .setRequired(true)
-        )
-        .addStringOption((option) =>
-          option
-            .setName("value")
-            .setDescription("the value to set the key to")
-            .setRequired(true)
+          option.setName("value").setDescription("the value to set the key to").setRequired(true)
         )
         .addBooleanOption((option) =>
-          option
-            .setName("show")
-            .setDescription(
-              "whether the reply should be shown (default: false)"
-            )
+          option.setName("show").setDescription("whether the reply should be shown (default: false)")
         )
     );
   }
@@ -48,15 +34,14 @@ export class ConfigCommand extends Command {
     if (interaction.user.id !== process.env.BOT_OWNER) {
       return interaction.reply({
         content: `only the bot owner <@${process.env.BOT_OWNER}> can use this command`,
-        ephemeral: !show,
+        flags: show ? undefined : MessageFlags.Ephemeral,
       });
     }
 
     if (!/^[a-zA-Z0-9:_-]+$/.test(userKey)) {
       return interaction.reply({
-        content:
-          "invalid key, must be lowercase, alphanumeric, and can contain underscores, dashes, and colons.",
-        ephemeral: !show,
+        content: "invalid key. must be lowercase, alphanumeric, and can contain underscores, dashes, and colons.",
+        flags: show ? undefined : MessageFlags.Ephemeral,
       });
     }
 
@@ -92,12 +77,12 @@ export class ConfigCommand extends Command {
           text: "A bot restart may be needed for some changes to take effect: /restart",
         });
 
-      return interaction.reply({ embeds: [embed], ephemeral: !show });
+      return interaction.reply({ embeds: [embed], flags: show ? undefined : MessageFlags.Ephemeral });
     } catch (error) {
       console.error(error);
       return interaction.reply({
         content: `An error occurred while updating the config: ${error}`,
-        ephemeral: !show,
+        flags: show ? undefined : MessageFlags.Ephemeral,
       });
     }
   }
