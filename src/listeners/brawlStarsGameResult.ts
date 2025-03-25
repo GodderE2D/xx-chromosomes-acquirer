@@ -262,7 +262,7 @@ export class BrawlStarsGameResultListener extends Listener {
                       ? `[D] Team ${i + 1}`
                       : (team!.some(({ tag: t }) => t === tag) && (battle.result === "victory" || battle.rank === 1)) ||
                         (team!.every(({ tag: t }) => t !== tag) &&
-                          (battle.result === "defeat" || (battle.rank ?? 0) > 1))
+                          (battle.result === "defeat" || ((battle.rank ?? 0) > 1 && i === 0)))
                       ? `[W] Team ${i + 1}`
                       : `[L] Team ${i + 1}`,
                     value: team!
