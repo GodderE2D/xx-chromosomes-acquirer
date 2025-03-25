@@ -205,7 +205,7 @@ export class BrawlStarsGameResultListener extends Listener {
           for (const { battleTime, event, battle } of parsed.data.items) {
             if (battle.type === "friendly") continue;
             if ((cache.get(tag)?.getTime() ?? 0) >= getDate(battleTime).getTime()) continue;
-            if (getDate(battleTime).getTime() <= Date.now() - Infinity) continue;
+            if (getDate(battleTime).getTime() <= Date.now() - 300_000) continue;
 
             cache.set(tag, getDate(battleTime));
 
