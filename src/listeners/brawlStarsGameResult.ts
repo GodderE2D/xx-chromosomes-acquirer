@@ -49,9 +49,9 @@ const events = {
 
 const gameTypes = {
   ranked: "",
-  soloRanked: "Ranked - ",
-  friendly: "Friendly Game - ",
-  challenge: "Special Challenge - ",
+  soloRanked: "Ranked",
+  friendly: "Friendly Game",
+  challenge: "Special Challenge",
 };
 
 const rankedRanks = [
@@ -110,7 +110,11 @@ export class BrawlStarsGameResultListener extends Listener {
     const cache = new Map<string, Date>();
 
     setInterval(async () => {
-      for (const tag of tags) {
+      for (let tag of tags) {
+        // i spent way too long figuring this out, but the api accepts either zero or the letter 'O'
+        // in tags, but only returns zero.
+        tag = tag.replaceAll("O", "0");
+
         try {
           const { data: playerData } = await axios.get(
             `https://api.brawlstars.com/v1/players/${encodeURIComponent(tag)}`,
@@ -137,20 +141,21 @@ export class BrawlStarsGameResultListener extends Listener {
               z.object({
                 battleTime: z.string(),
                 event: z.object({
-                  mode: z.string(),
-                  map: z.string(),
+                  mode: z.string().nullish(),
+                  map: z.string().nullish(),
                 }),
                 battle: z.object({
+                  mode: z.string().nullish(),
                   type: z.string(),
-                  result: z.string().optional(),
-                  rank: z.number().optional(),
-                  duration: z.number().optional(),
-                  trophyChange: z.number().optional(),
+                  result: z.string().nullish(),
+                  rank: z.number().nullish(),
+                  duration: z.number().nullish(),
+                  trophyChange: z.number().nullish(),
                   starPlayer: z
                     .object({
                       tag: z.string(),
                     })
-                    .optional(),
+                    .nullish(),
                   teams: z
                     .array(
                       z.array(
@@ -165,7 +170,7 @@ export class BrawlStarsGameResultListener extends Listener {
                         })
                       )
                     )
-                    .optional(),
+                    .nullish(),
                   players: z
                     .array(
                       z.object({
@@ -178,7 +183,7 @@ export class BrawlStarsGameResultListener extends Listener {
                         }),
                       })
                     )
-                    .optional(),
+                    .nullish(),
                 }),
               })
             ),
@@ -187,7 +192,7 @@ export class BrawlStarsGameResultListener extends Listener {
           const parsed = schema.safeParse(battleLogData);
 
           if (!parsed.success) {
-            console.error("Brawl Stars game result parsing error:", parsed.error.errors);
+            console.error(`[${new Date()}] Brawl Stars game result parsing error:`, parsed.error.errors);
             continue;
           }
 
@@ -198,47 +203,68 @@ export class BrawlStarsGameResultListener extends Listener {
           }
 
           for (const { battleTime, event, battle } of parsed.data.items) {
+            if (battle.type === "friendly") continue;
             if ((cache.get(tag)?.getTime() ?? 0) >= getDate(battleTime).getTime()) continue;
-            if (getDate(battleTime).getTime() <= Date.now() - 300_000) continue;
+            if (getDate(battleTime).getTime() <= Date.now() - Infinity) continue;
 
             cache.set(tag, getDate(battleTime));
 
-            const ownTeam =
-              battle.teams?.find((team) => team.some((player) => player.tag === tag)) ??
-              battle.players ??
-              battle.teams?.[0];
-            const opponentTeam =
-              battle.teams?.find((team) => team.every((player) => player.tag !== tag)) ?? battle.teams?.[1];
+            // const ownTeam =
+            //   battle.teams?.findIndex((team) => team.some((player) => player.tag === tag)) ??
+            //   battle.players ??
+            //   battle.teams?.[0];
+            // const opponentTeam =
+            //   battle.teams?.findIndex((team) => team.every((player) => player.tag !== tag)) ?? battle.teams?.[1];
+
+            // const sortedTeams = battle.teams?.sort((a, b) => {
+            //   if (a.some((player) => player.tag === tag)) return -1;
+            //   if (b.some((player) => player.tag === tag)) return 1;
+            //   return 0;
+            // }) ?? [battle.players];
+
+            // winning team first
+            const sortedTeams = battle.teams?.sort((a, b) => {
+              if (a.some((player) => player.tag === tag) && battle.result === "victory") return -1;
+              if (b.some((player) => player.tag === tag) && battle.result === "victory") return 1;
+              if (a.every((player) => player.tag !== tag) && battle.result === "defeat") return -1;
+              if (b.every((player) => player.tag !== tag) && battle.result === "defeat") return 1;
+              return 0;
+            }) ?? [battle.players];
 
             const embed = new EmbedBuilder()
               .setDescription(
                 `**${name}** ${
                   battle.rank
-                    ? `placed #${battle.rank}`
+                    ? `placed **#${battle.rank}**`
                     : battle.result === "victory"
                     ? "won"
                     : battle.result === "defeat"
                     ? "lost"
                     : "drew"
-                } ${battle.trophyChange ? `(${battle.trophyChange > 0 ? "+" : ""}${battle.trophyChange})` : ""}${
+                }${battle.trophyChange ? ` (${battle.trophyChange > 0 ? "+" : ""}${battle.trophyChange})` : ""}${
                   battle.rank ? " in" : ""
-                } a Brawl Stars game of **${gameTypes[battle.type as keyof typeof gameTypes] ?? battle.type}${
-                  events[event.mode as keyof typeof events] ?? event.mode
-                }** on **${event.map}** <t:${Math.floor(getDate(battleTime).getTime() / 1000)}:R>`
+                } a Brawl Stars game of **${gameTypes[battle.type as keyof typeof gameTypes] ?? battle.type ?? ""}${
+                  (gameTypes[battle.type as keyof typeof gameTypes] ?? battle.type) &&
+                  (events[(event.mode ?? battle.mode) as keyof typeof events] ?? event.mode ?? battle.mode)
+                    ? " - "
+                    : ""
+                }${events[(event.mode ?? battle.mode) as keyof typeof events] ?? event.mode ?? battle.mode ?? ""}**${
+                  event.map ? ` on **${event.map}**` : ""
+                } <t:${Math.floor(getDate(battleTime).getTime() / 1000)}:R>`
               )
               .setColor(battle.result === "victory" ? "Green" : battle.result === "defeat" ? "Red" : "Blue")
               .addFields(
-                [ownTeam, opponentTeam]
-                  .filter(Boolean)
+                sortedTeams
                   .map((team, i) => ({
                     name: battle.players
                       ? "Players"
                       : battle.result === "draw"
                       ? `[D] Team ${i + 1}`
-                      : (team!.some(({ tag: t }) => t === tag) && battle.result === "victory") ||
-                        (team!.every(({ tag: t }) => t !== tag) && battle.result === "defeat")
-                      ? "[W] Team 1"
-                      : "[L] Team 2",
+                      : (team!.some(({ tag: t }) => t === tag) && (battle.result === "victory" || battle.rank === 1)) ||
+                        (team!.every(({ tag: t }) => t !== tag) &&
+                          (battle.result === "defeat" || (battle.rank ?? 0) > 1))
+                      ? `[W] Team ${i + 1}`
+                      : `[L] Team ${i + 1}`,
                     value: team!
                       .map(
                         ({ tag: teamPlayerTag, name, brawler }) =>

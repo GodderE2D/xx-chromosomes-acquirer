@@ -46,7 +46,7 @@ export class ConfigCommand extends Command {
     }
 
     try {
-      const oldResult = await db.get(userKey);
+      const oldResult = await db.get(`config.${userKey}`);
       if (!userValue.length) {
         await db.delete(`config.${userKey}`);
       } else {
