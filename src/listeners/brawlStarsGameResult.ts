@@ -237,10 +237,10 @@ export class BrawlStarsGameResultListener extends Listener {
                   battle.rank
                     ? `placed **#${battle.rank}**`
                     : battle.result === "victory"
-                    ? "won"
-                    : battle.result === "defeat"
-                    ? "lost"
-                    : "drew"
+                      ? "won"
+                      : battle.result === "defeat"
+                        ? "lost"
+                        : "drew"
                 }${battle.trophyChange ? ` (${battle.trophyChange > 0 ? "+" : ""}${battle.trophyChange})` : ""}${
                   battle.rank ? " in" : ""
                 } a Brawl Stars game of **${gameTypes[battle.type as keyof typeof gameTypes] ?? battle.type ?? ""}${
@@ -259,31 +259,32 @@ export class BrawlStarsGameResultListener extends Listener {
                     name: battle.players
                       ? "Players"
                       : battle.result === "draw"
-                      ? `[D] Team ${i + 1}`
-                      : (team!.some(({ tag: t }) => t === tag) && (battle.result === "victory" || battle.rank === 1)) ||
-                        (team!.every(({ tag: t }) => t !== tag) &&
-                          (battle.result === "defeat" || ((battle.rank ?? 0) > 1 && i === 0)))
-                      ? `[W] Team ${i + 1}`
-                      : `[L] Team ${i + 1}`,
+                        ? `[D] Team ${i + 1}`
+                        : (team!.some(({ tag: t }) => t === tag) &&
+                              (battle.result === "victory" || battle.rank === 1)) ||
+                            (team!.every(({ tag: t }) => t !== tag) &&
+                              (battle.result === "defeat" || ((battle.rank ?? 0) > 1 && i === 0)))
+                          ? `[W] Team ${i + 1}`
+                          : `[L] Team ${i + 1}`,
                     value: team!
                       .map(
                         ({ tag: teamPlayerTag, name, brawler }) =>
-                          `[\`${name}\`](https://brawlify.com/stats/profile/${tag.slice(1)}) - **${brawler.name}**${
+                          `[\`${name}\`](https://brawlify.com/stats/profile/${teamPlayerTag.slice(1)}) - **${brawler.name}**${
                             brawler.power ? ` (${brawler.power})` : ""
                           }${
                             battle.type === "soloRanked"
                               ? ` \`${rankedRanks[brawler.trophies - 1]}\``
                               : brawler.trophies !== 0
-                              ? ` \`🏆 ${brawler.trophies}\``
-                              : ""
+                                ? ` \`🏆 ${brawler.trophies}\``
+                                : ""
                           }${
                             battle.starPlayer?.tag === teamPlayerTag && tag === teamPlayerTag
                               ? " ⭐ 💙"
                               : battle.starPlayer?.tag === teamPlayerTag
-                              ? " ⭐"
-                              : tag === teamPlayerTag
-                              ? " 💙"
-                              : ""
+                                ? " ⭐"
+                                : tag === teamPlayerTag
+                                  ? " 💙"
+                                  : ""
                           }`
                       )
                       .join("\n"),
